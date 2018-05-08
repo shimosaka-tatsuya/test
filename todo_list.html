@@ -1,0 +1,78 @@
+<html>
+<header>
+<meta charset="UTF-8">
+<title>TODOリストを作成</title>
+<meta name="description" content="vue.jsの練習です。">
+<link rel="stylesheet" type="text/css" media="all" href="index.css" />
+</header>
+<body>
+
+<div id="app">
+	<p>
+		<!--
+			テキストボックスとvueをバインド。
+			テキストボックスに入力した文字は、newTitleに代入される。
+			また、v-on:keyup.enterとすることで、文字が入力されてエンターを押された際に動作する関数を指定。
+		-->
+		<input type="text" placeholder="Input your task." v-model="newTitle" v-on:keyup.enter="addTodo(newTitle)">
+	</p>
+	<ul>
+		<!-- itemがある分だけ<li>を生成 -->
+		<li v-for="item in items">
+			<!--
+				v-bind:classで、クラス名を指定／解除を行える。
+				v-bind:class="{ done: true }" であれば class="done"、
+				v-bind:class="{ done: false }" であれば class=""となる。
+				isCheckedにtrue / falseが代入されているので、これを応用する
+			-->
+			<label v-bind:class="{ done: item.isChecked }">
+				<!-- チェックボックスとvueをバインド。isCheckedにはtrue or falseが代入される -->
+				<input type="checkbox" v-model="item.isChecked"> {{ item.title }}
+			</label>
+		</li>
+	</ul>
+	<button v-on:click="deleteTodo()">Delete to tasks that is checked.</button>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.1/vue.js"></script>
+<script type="text/javascript">
+const vm = new Vue({
+	el: '#app',
+	data: {
+		items: [],
+		newTitle: ''
+	},
+	methods: {  //methodsオプションをまるっと追加
+		addTodo: function(newTitle){
+			this.items.push({
+				title: newTitle,
+				isChecked: false
+			});
+			this.newTitle = '';
+			this.saveTodo(); // ブラウザに保存
+		},
+		deleteTodo: function(){
+			// isCheckedがfalseになっているitemだけを残す
+			this.items = this.items.filter(function(item){
+				return item.isChecked === false;
+			});
+			this.saveTodo(); // ブラウザに保存
+		},
+		// ブラウザにTODOを保存する処理
+		saveTodo: function(){
+			localStorage.setItem('items', JSON.stringify(this.items));
+		},
+		loadTodo: function(){
+			this.items = JSON.parse( localStorage.getItem('items') );
+			if( !this.items ){
+				this.items = [];
+			}
+	    }
+	},
+	mounted: function(){
+		this.loadTodo();
+	}
+  })
+</script>
+</body>
+</html>
